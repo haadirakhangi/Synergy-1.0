@@ -59,12 +59,22 @@ const Dashboard = () => {
     { category: string; count: number }[]
   >([]);
   const [data, setData] = useState<Folder>(folderStructure);
+  const [treeData, setTreeData] = useState<Folder>({ name: 'Root', toggled: true });
 
   const onToggle = (node: any, toggled: boolean) => {
     if (node.children) {
       node.toggled = toggled;
     }
     setData({ ...data });
+  };
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get<Folder>('api/dashboard'); // Update with your Flask server endpoint
+      setData(response.data);
+    } catch (error) {
+      console.error('Error fetching directory structure:', error);
+    }
   };
 
   const fetchDashboardData = async () => {
@@ -93,6 +103,7 @@ const Dashboard = () => {
   useEffect(() => {
     // Fetch initial dashboard data
     fetchDashboardData();
+    fetchData();
   }, []);
 
   const handleProjectChange = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -103,7 +114,7 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <Container sx={{ minHeight: '80vh'}}>
+      <Container sx={{ minHeight: '80vh', padding: '20px'}}>
         <Typography variant="h4" component="h1" align="center" gutterBottom>
           PDF File Management Dashboard
         </Typography>

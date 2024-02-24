@@ -33,6 +33,19 @@ generation_config = {
   "max_output_tokens": 2048,
 }
 
+#build directories
+def build_directory_structure(path):
+    result = {'name': os.path.basename(path), 'toggled': True}
+    try:
+        contents = os.listdir(path)
+        result['children'] = [
+            build_directory_structure(os.path.join(path, child))
+            for child in contents
+        ]
+    except Exception as e:
+        print(f"Error building structure for {path}: {e}")
+    return result
+
 # Bottom crop funtion
 def crop_bottom(input_image_path):
     image = cv2.imread(input_image_path)
@@ -169,6 +182,10 @@ def confirm_details():
         shutil.move(file_path, os.path.join(new_directory, new_filename))
         return jsonify({'message': 'Details confirmed successfully','info': response})
 
+@app.route('/dashboard')
+def dashboard():
+    root_path = 'projects'  # Replace with the actual path to your projects directory
+    return jsonify(build_directory_structure(root_path))
     
 
 @app.route('/logout')
