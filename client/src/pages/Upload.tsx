@@ -105,6 +105,7 @@ const Upload: React.FC = () => {
           flexDirection: 'column',
           alignItems: 'center',
           mt: 8,
+          minHeight: '80vh', // Adjust the minHeight property as needed
         }}
       >
         <Box sx={{ mt: 1 }}>

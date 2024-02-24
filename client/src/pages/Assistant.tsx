@@ -15,7 +15,7 @@ const Assistant = () => {
 
   return (
     <Layout>
-      <Container style={{ marginTop: '64px' }}> {/* Adjust the top margin according to your navigation bar's height */}
+      <Container style={{ marginTop: '64px', minHeight: '80vh' }}> {/* Adjust the top margin according to your navigation bar's height */}
         <Typography variant="h4" component="h1" align="center" gutterBottom>
           Virtual Assistant
         </Typography>
