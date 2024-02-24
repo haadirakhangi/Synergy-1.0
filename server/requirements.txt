@@ -1,0 +1,7 @@
+openai
+langchain
+langchain_community
+langchain_openai
+langsmith
+python-dotenv
+flask

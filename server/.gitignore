@@ -1,0 +1,7 @@
+*.zip
+.ipynb_checkpoints/
+.env
+__pycache__/
+test.py
+myenv
+venv
