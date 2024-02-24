@@ -168,7 +168,7 @@ const Upload: React.FC = () => {
                 style={{ marginBottom: '1em' }}
               >
                 <MenuItem value="construction_plan">Construction Plan</MenuItem>
-                <MenuItem value="other_docs">Other Documents</MenuItem>
+                <MenuItem value="other_document">Other Documents</MenuItem>
               </TextField>
 
               <TextField

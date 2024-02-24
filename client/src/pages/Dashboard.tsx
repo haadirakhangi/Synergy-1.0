@@ -19,6 +19,37 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { Treebeard } from 'react-treebeard';
+
+interface File {
+  name: string;
+}
+
+interface Folder {
+  name: string;
+  children?: (File | Folder)[];
+}
+
+const folderStructure: Folder = {
+  name: 'Root',
+  toggled: true,
+  children: [
+    {
+      name: 'Folder 1',
+      children: [
+        { name: 'File 1.pdf' },
+        { name: 'File 2.pdf' },
+      ],
+    },
+    {
+      name: 'Folder 2',
+      children: [
+        { name: 'File 3.pdf' },
+        { name: 'File 4.pdf' },
+      ],
+    },
+  ],
+};
 
 const Dashboard = () => {
   const [totalProjects, setTotalProjects] = useState<number>(0);
@@ -27,6 +58,14 @@ const Dashboard = () => {
   const [fileCategories, setFileCategories] = useState<
     { category: string; count: number }[]
   >([]);
+  const [data, setData] = useState<Folder>(folderStructure);
+
+  const onToggle = (node: any, toggled: boolean) => {
+    if (node.children) {
+      node.toggled = toggled;
+    }
+    setData({ ...data });
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -144,6 +183,7 @@ const Dashboard = () => {
             )}
           </Grid>
         </Grid>
+        <Treebeard data={data} onToggle={onToggle} />
       </Container>
     </Layout>
   );
