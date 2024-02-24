@@ -10,6 +10,7 @@ import cv2
 import os
 import re
 import json
+import shutil
 from PIL import Image
 
 load_dotenv(find_dotenv())
@@ -71,6 +72,7 @@ def get_category():
         image_path = os.path.join(project_directory, 'img.jpeg')
         session['file_path'] = file_path
         session['image_path'] = image_path
+        session['project_name'] = project_name
         # Save the file in the project-specific directory
         file.save(file_path)
         print(f"Saved file: {file_path}")
@@ -94,7 +96,9 @@ def confirm_details():
     data = request.get_json()
     print("Data",data)
     image_path = session['image_path']
-    print("file path",image_path)
+    file_path = session['file_path']
+    project_name = session['project_name']
+    print("file path",file_path)
     if data['document_type'] == 'construction_plan':            
         if data['index_position'] == 'right':
             cropped_image = crop_right(input_image_path=image_path)
@@ -107,6 +111,12 @@ def confirm_details():
         response_two.resolve()
         data_dict2 = get_dict_from_json(response_two)
         print("Output:- ",data_dict2)
+        date = data_dict2['date'].replace("/","_")
+        new_filename = data_dict2['drawing_number']+"_"+data_dict2['revision']+"_"+data_dict2['drawing_status']+"_"+date+".pdf"
+        new_directory = os.path.join("projects",project_name,data['document_type'])
+        if not os.path.exists(new_directory):
+            os.makedirs(new_directory)
+        shutil.move(file_path, os.path.join(new_directory, new_filename))
     return jsonify({'message': 'Details confirmed successfully','info': data_dict2})
 
 @app.route('/logout')
