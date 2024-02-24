@@ -1,12 +1,66 @@
-import React from "react";
-import Layout from "../components/Layout/Layout";
-import { Container, Card, CardContent, Typography, Grid } from "@mui/material";
+import React, { useState, useEffect } from 'react';
+import Layout from '../components/Layout/Layout';
+import axios from 'axios';
+import {
+  Container,
+  Typography,
+  Select,
+  MenuItem,
+  Grid,
+  Card,
+  CardContent,
+} from '@mui/material';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 
 const Dashboard = () => {
-  // Sample data (replace with real data)
-  const totalPDFs = 50;
-  const recentUploads = 5;
-  const totalDownloads = 100;
+  const [totalProjects, setTotalProjects] = useState<number>(0);
+  const [totalFiles, setTotalFiles] = useState<number>(0);
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [fileCategories, setFileCategories] = useState<
+    { category: string; count: number }[]
+  >([]);
+
+  const fetchDashboardData = async () => {
+    try {
+      // Fetch total projects and total files
+      const response = await axios.get('your-flask-server-endpoint/dashboard');
+      setTotalProjects(response.data.totalProjects);
+      setTotalFiles(response.data.totalFiles);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    }
+  };
+
+  const fetchFileCategories = async (projectName: string) => {
+    try {
+      // Fetch file categories for the selected project
+      const response = await axios.get(
+        `your-flask-server-endpoint/fileCategories?project=${projectName}`
+      );
+      setFileCategories(response.data);
+    } catch (error) {
+      console.error('Error fetching file categories:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch initial dashboard data
+    fetchDashboardData();
+  }, []);
+
+  const handleProjectChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const projectName = event.target.value as string;
+    setSelectedProject(projectName);
+    fetchFileCategories(projectName);
+  };
 
   return (
     <Layout>
@@ -16,49 +70,79 @@ const Dashboard = () => {
         </Typography>
 
         <Grid container spacing={3}>
-          {/* Total PDFs Card */}
+          {/* Total Projects Card */}
           <Grid item xs={12} sm={6} md={4}>
             <Card>
               <CardContent>
                 <Typography variant="h6" component="div">
-                  Total PDFs
+                  Total Projects
                 </Typography>
                 <Typography variant="h4" component="div">
-                  {totalPDFs}
+                  {totalProjects}
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          {/* Recent Uploads Card */}
+          {/* Total Files Card */}
           <Grid item xs={12} sm={6} md={4}>
             <Card>
               <CardContent>
                 <Typography variant="h6" component="div">
-                  Recent Uploads
+                  Total Files
                 </Typography>
                 <Typography variant="h4" component="div">
-                  {recentUploads}
+                  {totalFiles}
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          {/* Total Downloads Card */}
+          {/* Project Dropdown */}
           <Grid item xs={12} sm={6} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" component="div">
-                  Total Downloads
-                </Typography>
-                <Typography variant="h4" component="div">
-                  {totalDownloads}
-                </Typography>
-              </CardContent>
-            </Card>
+            <Typography variant="h6" component="div">
+              Select Project
+            </Typography>
+            <Select
+              value={selectedProject || ''}
+              onChange={handleProjectChange}
+              fullWidth
+            >
+              <MenuItem value="" disabled>
+                Select a project
+              </MenuItem>
+              {/* Dynamically populate the projects here */}
+              {/* Example: */}
+              <MenuItem value="Project1">Project1</MenuItem>
+              <MenuItem value="Project2">Project2</MenuItem>
+              {/* Add more projects as needed */}
+            </Select>
           </Grid>
 
-          {/* Add more cards as needed for additional statistics */}
+          {/* File Categories Graph */}
+          <Grid item xs={12}>
+            {selectedProject && (
+              <div>
+                <Typography variant="h6" component="div">
+                  File Categories for {selectedProject}
+                </Typography>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart
+                    width={500}
+                    height={300}
+                    data={fileCategories}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <XAxis dataKey="category" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="count" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </Grid>
         </Grid>
       </Container>
     </Layout>

@@ -13,7 +13,7 @@ import {
   MenuItem,
 } from '@mui/material';
 import axios from 'axios';
-import { Document, Page, pdfjs } from 'react-pdf';
+//import { Document, Page, pdfjs } from 'react-pdf';
 
 const Upload: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
