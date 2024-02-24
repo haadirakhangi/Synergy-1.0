@@ -1,134 +1,121 @@
-import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
-import AdbIcon from '@mui/icons-material/Adb';
+import React, { useState } from "react";
+import {
+  AppBar,
+  Box,
+  Divider,
+  Drawer,
+  IconButton,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import Logo from "../../images/logo.svg";
 
-const pages = [
-  { label: 'Upload', link: '/upload' },
-  { label: 'Dashboard', link: '/dashboard' },
-  { label: 'Searching', link: '/searching' },
-];
-
-const settings = [
-  { label: 'Profile', link: '/profile' },
-  { label: 'Logout', link: '/logout' },
-];
-
-function Header() {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget);
+import MenuIcon from "@mui/icons-material/Menu";
+import { NavLink } from "react-router-dom";
+import "../../styles/HeaderStyles.css";
+const Header = () => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  // hndle menu click
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
   };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
-
-  return (
-    <AppBar position="static">
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            MANAGER
-          </Typography>
-
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: 'block', md: 'none' },
-              }}
-            >
-              {pages.map((page) => (
-                <MenuItem key={page.label} onClick={handleCloseNavMenu}>
-                  <a href={page.link} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <Typography textAlign="center">{page.label}</Typography>
-                  </a>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-
-          <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            Logo
-          </Typography>
-
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
-              <Button
-                key={page.label}
-                href={page.link}
-                sx={{ my: 2, color: 'white', display: 'block', textDecoration: 'none' }}
-              >
-                {page.label}
-              </Button>
-            ))}
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
+  //menu drawer
+  const drawer = (
+    <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
+      <Typography
+        color={"white"}
+        variant="h6"
+        component="div"
+        sx={{ flexGrow: 1, my: 2 }}
+      >
+        <img src={Logo} alt="logo" height={"70"} width="200" />
+      </Typography>
+      <Divider />
+      <ul className="mobile-navigation">
+        <li>
+          <NavLink activeClassName="active" to={"/"}>
+            Home
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to={"/dashbord"}>Dashboard</NavLink>
+        </li>
+        <li>
+          <NavLink to={"/assistant"}>Assistant</NavLink>
+        </li>
+        <li>
+          <NavLink to={"/upload"}>Upload</NavLink>
+        </li>
+      </ul>
+    </Box>
   );
-}
+  return (
+    <>
+      <Box>
+        <AppBar component={"nav"} sx={{ bgcolor: "black" }}>
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              sx={{
+                mr: 2,
+                display: { sm: "none" },
+              }}
+              onClick={handleDrawerToggle}
+            >
+              <MenuIcon/>
+            </IconButton>
+            <Typography
+              color={"white"}
+              variant="h6"
+              component="div"
+              sx={{ flexGrow: 1 }}
+            >
+              <img src={Logo} alt="logo" height={"70"} width="250" />
+            </Typography>
+            <Box sx={{ display: { xs: "none", sm: "block" } }}>
+              <ul className="navigation-menu">
+                <li>
+                  <NavLink activeClassName="active" to={"/"}>
+                    Home
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to={"/dashboard"}>Dashboard</NavLink>
+                </li>
+                <li>
+                  <NavLink to={"/assistant"}>Assistant</NavLink>
+                </li>
+                <li>
+                  <NavLink to={"/upload"}>Upload</NavLink>
+                </li>
+              </ul>
+            </Box>
+          </Toolbar>
+        </AppBar>
+        <Box component="nav">
+          <Drawer
+            variant="temporary"
+            open={mobileOpen}
+            onClose={handleDrawerToggle}
+            sx={{
+              display: { xs: "block", sm: "none" },
+              "& .MuiDrawer-paper": {
+                boxSizing: "border-box",
+                width: "240px",
+              },
+            }}
+          >
+            {drawer}
+          </Drawer>
+        </Box>
+        <Box>
+          <Toolbar />
+        </Box>
+      </Box>
+    </>
+  );
+};
 
 export default Header;

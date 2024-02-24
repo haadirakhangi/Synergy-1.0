@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout/Layout';
 import '../styles/HomeStyles.css';
-import home from '../images/home.jpg';
+import home from '../images/no.jpg';
 import "../styles/HeaderStyles.css";
 
 const Home: React.FC = () => {

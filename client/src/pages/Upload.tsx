@@ -1,28 +1,53 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout/Layout';
-import { Button, CircularProgress, Typography, Container, Box, Grid } from '@mui/material';
+import {
+  Button,
+  CircularProgress,
+  Typography,
+  Container,
+  Box,
+  Card,
+  CardContent,
+  CardMedia,
+  TextField,
+} from '@mui/material';
 import axios from 'axios';
+import { Document, Page, pdfjs } from 'react-pdf';
 
 const Upload: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
+  const [projectName, setProjectName] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<string | null>(null);
+  const [filePreview, setFilePreview] = useState<string | ArrayBuffer | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files && event.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
+
+      // Preview the selected file
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview(reader.result);
+      };
+      reader.readAsDataURL(selectedFile);
     }
   };
 
+  const handleProjectNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setProjectName(event.target.value);
+  };
+
   const handleUpload = async () => {
-    if (!file) {
-      console.error('No file selected');
+    if (!file || !projectName) {
+      console.error('Please select a file and enter a project name');
       return;
     }
 
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('projectName', projectName);
 
     try {
       setLoading(true);
@@ -51,6 +76,14 @@ const Upload: React.FC = () => {
           <Typography component="h1" variant="h3" style={{ marginBottom: '1em' }}>
             Upload Your Document Below
           </Typography>
+          <TextField
+            label="Project Name"
+            variant="outlined"
+            fullWidth
+            value={projectName}
+            onChange={handleProjectNameChange}
+            style={{ marginBottom: '1em' }}
+          />
           <input type="file" onChange={handleFileChange} style={{ width: '100%', marginBottom: '1em' }} />
           <Button
             variant="contained"
@@ -58,11 +91,32 @@ const Upload: React.FC = () => {
             onClick={handleUpload}
             disabled={loading}
             style={{ width: '100%' }}
+            sx={{
+              backgroundColor: 'black',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'darkslategray', // Change to the desired hover color
+              },
+            }}
           >
             Upload
           </Button>
 
           {loading && <CircularProgress style={{ marginTop: '1em' }} />}
+
+          {filePreview && (
+            <Card style={{ marginTop: '1em', maxWidth: 400 }}>
+              <CardMedia
+                component="img"
+                alt="Uploaded File"
+                height="140"
+                image={URL.createObjectURL(file as Blob)}
+              />
+              <CardContent>
+                <Typography variant="h6">Uploaded File Preview</Typography>
+              </CardContent>
+            </Card>
+          )}
 
           {response && (
             <div style={{ marginTop: '1em' }}>
