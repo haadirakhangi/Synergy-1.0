@@ -1,5 +1,6 @@
 .home {
-    height: 90vh;
+    /* height: 90vh; Remove or adjust this line */
+    min-height: 100vh; /* Set a minimum height to ensure scrollability */
     display: flex;
     justify-content: center;
     align-items: left;
@@ -8,6 +9,7 @@
     background-repeat: no-repeat;
     background-size: cover;
   }
+  
   
   .headerContainer {
     width: auto;
@@ -29,6 +31,7 @@
     font-size: 40px;
     font-weight: lighter;
     color: black;
+    
   }
   
   .headerContainer button {
