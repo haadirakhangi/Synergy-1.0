@@ -5,3 +5,7 @@ langchain_openai
 langsmith
 python-dotenv
 flask
+google-generativeai
+pdf2image
+poppler-utils
+opencv-python
