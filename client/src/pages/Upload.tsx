@@ -122,6 +122,7 @@ const Upload: React.FC = () => {
           alignItems: 'center',
           mt: 8,
           minHeight: '80vh', // Adjust the minHeight property as needed
+          bgcolor: '#d9d9da',
         }}
       >
         <Box sx={{ mt: 1 ,mb: 10}}>

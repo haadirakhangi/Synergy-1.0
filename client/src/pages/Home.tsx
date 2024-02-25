@@ -18,7 +18,7 @@ const Home: React.FC = () => {
 
       // Define the scroll positions where you want to change the background image
       const breakpoints = [0]; // Adjust as needed
-      const images = [home1]; // Add more images if necessary
+      const image = [home1]; // Add more images if necessary
 
       // Determine the current background image based on the scroll position
       for (let i = 0; i < breakpoints.length - 1; i++) {
@@ -54,6 +54,7 @@ const Home: React.FC = () => {
           </Link>
         </div>
       </div>
+      
     </Layout>
     <ChatWidget />
     </>
