@@ -39,16 +39,9 @@ generation_config = {
   "max_output_tokens": 2048,
 }
 
-FEATURE_DOCS_PATH = 'assistant_data/Description.pdf'
-loader = PyPDFLoader(FEATURE_DOCS_PATH)
-docs = loader.load()
-docs_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-split_docs = docs_splitter.split_documents(docs)
 EMBEDDINGS = OpenAIEmbeddings()
-ASSISTANT_VECTORSTORE = FAISS.from_documents(split_docs, EMBEDDINGS)
-ASSISTANT_VECTORSTORE.save_local('assistant_data/faiss_index_assistant')
-print('CREATED VECTORSTORE')
-VECTORDB = FAISS.load_local('assistant_data/faiss_index_assistant', EMBEDDINGS)
+
+
 
 tools = [
     {
@@ -72,10 +65,10 @@ tools = [
 ]
 detector = LanguageDetectorBuilder.from_all_languages().with_preloaded_language_models().build()
 
-client = OpenAI()
+client = OpenAI(api_key=openai.api_key)
 assistant = client.beta.assistants.create(
     name="SEQUUS",
-    instructions="You are a helpful assistant for the website SEQUUS. Use the functions provided to you to answer user's question about the Mindcraft platform. Help the user with navigating and getting information about the SEQUUS website.Provide the navigation links defined in the document whenever required",
+    instructions="You are an assistant for the SEQUUS website and you will be given a document from the user. Help the user with their queries about the document. Use the tools provided to you to answer the user queries.",
     model="gpt-3.5-turbo-1106",
     tools=tools
 )
@@ -156,15 +149,16 @@ def get_dict_from_json(response):
     else:
         print("No valid JSON found in the input string.")
 
-def retrieval_augmented_generation(query, vectordb=VECTORDB):
-    relevant_docs = vectordb.similarity_search(query)
+def retrieval_augmented_generation(query):
+    VECTORDB = FAISS.load_local('assistant_data/faiss_index_assistant', EMBEDDINGS)
+    relevant_docs = VECTORDB.similarity_search(query)
     rel_docs = [doc.page_content for doc in relevant_docs]
     output = '\n'.join(rel_docs)
     print(output)
     return output
 
 def wait_on_run(run_id, thread_id):
-    client = OpenAI()
+    client = OpenAI(api_key=openai.api_key)
     while True:
         run = client.beta.threads.runs.retrieve(
             thread_id=thread_id,
@@ -321,7 +315,31 @@ def dashboard():
         'directory_structure': directory_structure
     }
     return jsonify(response_data)
+
+@app.route('/upload-file', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    if file:
+        # Save the file to the uploads directory
+        file_path = os.path.join('assistant_data', file.filename)
+        file.save(file_path)
+    loader = PyPDFLoader(file_path)
+    docs = loader.load()
+    docs_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    split_docs = docs_splitter.split_documents(docs)
     
+    ASSISTANT_VECTORSTORE = FAISS.from_documents(split_docs, EMBEDDINGS)
+    ASSISTANT_VECTORSTORE.save_local('assistant_data/faiss_index_assistant')
+    print('CREATED VECTORSTORE')
+    return jsonify({'chatbotResponse': 'File uploaded successfully'})
+
 @app.route('/chatbot-route', methods=['POST'])
 def chatbot_route():
     data = request.get_json()
@@ -334,9 +352,7 @@ def chatbot_route():
             trans_query = GoogleTranslator(source=source_language, target='en').translate(query)
         else:
             trans_query = query
-        assistant_id = session['assistant_id']
         print('ASSISTANT ID', assistant_id)
-        thread_id = session['thread_id']
         print('THREAD ID', thread_id)
         print(trans_query)
         message = client.beta.threads.messages.create(
@@ -346,7 +362,7 @@ def chatbot_route():
         )
         run = client.beta.threads.runs.create(
             thread_id=thread_id,
-            assistant_id=session['assistant_id'],
+            assistant_id=assistant_id,
         )
         run = wait_on_run(run.id, thread_id)
 

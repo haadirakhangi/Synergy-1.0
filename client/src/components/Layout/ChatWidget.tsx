@@ -15,43 +15,6 @@ const ChatWidget: React.FC = () => {
   const [userMessage, setUserMessage] = useState('');
   const [chatHistory, setChatHistory] = useState<Array<{ role: string; message: string }>>([]);
   const [loading, setLoading] = useState(false);
-  const [listening, setListening] = useState(false);
-  const audioChunks = useRef<Array<Blob>>([]);
-  const mediaRecorder = useRef<MediaRecorder | null>(null);
-
-  const startRecording = () => {
-    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-      mediaRecorder.current = new MediaRecorder(stream);
-      mediaRecorder.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunks.current.push(event.data);
-        }
-      };
-      mediaRecorder.current.onstop = () => {
-        const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
-        // Send the audioBlob to the server
-        sendAudioToServer(audioBlob);
-        audioChunks.current = [];
-      };
-
-      mediaRecorder.current.start();
-    });
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorder.current) {
-      mediaRecorder.current.stop();
-
-      // Ensure the stop method is called after a short delay
-      setTimeout(() => {
-        // Reset the microphone stream
-        const stream = mediaRecorder.current?.stream;
-        if (stream) {
-          stream.getTracks().forEach((track) => track.stop());
-        }
-      }, 100);
-    }
-  };
 
   const sendAudioToServer = async (audioBlob: Blob) => {
     try {
@@ -111,16 +74,34 @@ const ChatWidget: React.FC = () => {
     setUserMessage('');
   };
 
-  
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const formData = new FormData();
+      formData.append('file', event.target.files[0]);
 
-  const handleStartVoiceInput = () => {
-    startRecording();
-    setListening(true);
-  };
-
-  const handleStopVoiceInput = () => {
-    stopRecording();
-    setListening(false);
+      try {
+        setLoading(true);
+        setUserMessage('Uploading A file');
+        let newChatHistory = [...chatHistory];
+        newChatHistory.push({ role: 'user', message: userMessage });
+        const response = await axios.post('/api/upload-file', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        const chatbotResponse = response.data.chatbotResponse;
+        const newChatHistoryWithResponse = [
+          ...newChatHistory,
+          { role: 'chatbot', message: chatbotResponse },
+        ];
+        setChatHistory(newChatHistoryWithResponse);
+        setUserMessage('');
+      } catch (error) {
+        console.error('Error uploading file to server:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   return (
@@ -159,9 +140,9 @@ const ChatWidget: React.FC = () => {
             <button onClick={handleSendMessage} style={{ marginRight: '10px' }}>
               <FontAwesomeIcon icon={faPaperPlane} />
             </button>
-            <button onClick={listening ? handleStopVoiceInput : handleStartVoiceInput}>
-              <FontAwesomeIcon icon={listening ? faMicrophoneAltSlash : faMicrophone} />
-            </button>
+            <label className="file-upload-button" >
+              <input type="file" onChange={handleFileUpload} style={{width: "100px"}}/>
+            </label>
           </div>
         </div>
       )}

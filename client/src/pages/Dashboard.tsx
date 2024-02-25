@@ -22,6 +22,8 @@ import {
 import { shadows } from '@mui/system';
 import { Treebeard } from 'react-treebeard';
 import "../styles/DashboardStyle.css";
+import ChatWidget from '../components/Layout/ChatWidget';
+
 interface File {
   name: string;
 }
@@ -192,6 +194,7 @@ const Dashboard = () => {
           }}
         />
       </Container>
+      <ChatWidget />
     </Layout>
   );
 };
