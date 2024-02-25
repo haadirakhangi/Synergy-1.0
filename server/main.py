@@ -6,12 +6,17 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
+from deep_translator import GoogleTranslator
+from lingua import LanguageDetectorBuilder
+from iso639 import Lang
 from flask import Flask,session,request,jsonify
 from pdf2image import convert_from_path
 import google.generativeai as genai
 from langchain_core.runnables import RunnablePassthrough
+import time
 from langchain_core.pydantic_v1 import BaseModel, Field, validator
 from langchain_core.output_parsers import PydanticOutputParser
+import ast
 import openai
 import cv2
 import os
@@ -20,11 +25,12 @@ import json
 import shutil
 from PIL import Image
 
-openai.api_key = os.environ['OPENAI_API_KEY']
+
 load_dotenv(find_dotenv())
 app = Flask(__name__)
 app.secret_key = os.environ['SECRET_KEY']
 GOOGLE_API_KEY = os.environ['GOOGLE_API_KEY']
+openai.api_key = os.environ['OPENAI_API_KEY']
 genai.configure(api_key = GOOGLE_API_KEY)
 generation_config = {
   "temperature": 0.0,
@@ -32,6 +38,50 @@ generation_config = {
   "top_k": 1,
   "max_output_tokens": 2048,
 }
+
+FEATURE_DOCS_PATH = 'assistant_data/Description.pdf'
+loader = PyPDFLoader(FEATURE_DOCS_PATH)
+docs = loader.load()
+docs_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+split_docs = docs_splitter.split_documents(docs)
+EMBEDDINGS = OpenAIEmbeddings()
+ASSISTANT_VECTORSTORE = FAISS.from_documents(split_docs, EMBEDDINGS)
+ASSISTANT_VECTORSTORE.save_local('assistant_data/faiss_index_assistant')
+print('CREATED VECTORSTORE')
+VECTORDB = FAISS.load_local('assistant_data/faiss_index_assistant', EMBEDDINGS)
+
+tools = [
+    {
+        'type': 'function',
+        'function': {
+
+            'name': 'retrieval_augmented_generation',
+            'description': 'Fetches information about Mindcraft\'s platform to answer user\'s query',
+            'parameters': {
+                'type': 'object',
+                'properties': {
+                    'query': {
+                        'type': 'string',
+                        'description': 'The query to use for searching the vector database of Mindcraft'
+                    },
+                },
+                'required': ['query']
+            }
+        }
+    },
+]
+detector = LanguageDetectorBuilder.from_all_languages().with_preloaded_language_models().build()
+
+client = OpenAI()
+assistant = client.beta.assistants.create(
+    name="SEQUUS",
+    instructions="You are a helpful assistant for the website SEQUUS. Use the functions provided to you to answer user's question about the Mindcraft platform. Help the user with navigating and getting information about the SEQUUS website.Provide the navigation links defined in the document whenever required",
+    model="gpt-3.5-turbo-1106",
+    tools=tools
+)
+thread = client.beta.threads.create()
+assistant_id = assistant.id
+thread_id = thread.id
 
 #build directories
 def build_directory_structure(path):
@@ -105,6 +155,54 @@ def get_dict_from_json(response):
             print(f"Error decoding JSON: {e}")
     else:
         print("No valid JSON found in the input string.")
+
+def retrieval_augmented_generation(query, vectordb=VECTORDB):
+    relevant_docs = vectordb.similarity_search(query)
+    rel_docs = [doc.page_content for doc in relevant_docs]
+    output = '\n'.join(rel_docs)
+    print(output)
+    return output
+
+def wait_on_run(run_id, thread_id):
+    client = OpenAI()
+    while True:
+        run = client.beta.threads.runs.retrieve(
+            thread_id=thread_id,
+            run_id=run_id,
+        )
+        print('RUN STATUS', run.status)
+        time.sleep(0.5)
+        if run.status in ['failed', 'completed', 'requires_action']:
+            return run
+        
+available_tools = {
+    'retrieval_augmented_generation': retrieval_augmented_generation,
+}
+        
+def submit_tool_outputs(thread_id, run_id, tools_to_call):
+    tools_outputs = []
+    for tool in tools_to_call:
+        output = None
+        tool_call_id = tool.id
+        tool_name = tool.function.name
+        tool_args = tool.function.arguments
+        print('TOOL CALLED:', tool_name)
+        print('ARGUMENTS:', tool_args)
+        tool_to_use = available_tools.get(tool_name)
+        if tool_name =='retrieval_augmented_generation':
+            tool_args_dict = ast.literal_eval(tool_args)
+            query = tool_args_dict['query']
+            output = tool_to_use(query)
+        if tool_name == 'get_context_from_page':
+            tool_args_dict = ast.literal_eval(tool_args)
+            query = tool_args_dict['query']
+            output = tool_to_use(query)
+        if output:
+            tools_outputs.append(
+                {'tool_call_id': tool_call_id, 'output': output})
+
+    return client.beta.threads.runs.submit_tool_outputs(thread_id=thread_id, run_id=run_id, tool_outputs=tools_outputs)
+
 
 # Pydantic class for langchain schema
 class Extraction(BaseModel):
@@ -222,6 +320,56 @@ def dashboard():
     }
     return jsonify(response_data)
     
+@app.route('/chatbot-route', methods=['POST'])
+def chatbot_route():
+    data = request.get_json()
+    print(data)
+    tool_check = []
+    query = data.get('userdata', '')
+    if query:
+        source_language = Lang(str(detector.detect_language_of(query)).split('.')[1].title()).pt1
+        if source_language != 'en':
+            trans_query = GoogleTranslator(source=source_language, target='en').translate(query)
+        else:
+            trans_query = query
+        assistant_id = session['assistant_id']
+        print('ASSISTANT ID', assistant_id)
+        thread_id = session['thread_id']
+        print('THREAD ID', thread_id)
+        print(trans_query)
+        message = client.beta.threads.messages.create(
+            thread_id=thread_id,
+            role="user",
+            content= trans_query,
+        )
+        run = client.beta.threads.runs.create(
+            thread_id=thread_id,
+            assistant_id=session['assistant_id'],
+        )
+        run = wait_on_run(run.id, thread_id)
+
+        if run.status == 'failed':
+            print(run.error)
+        elif run.status == 'requires_action':
+            run = submit_tool_outputs(thread_id, run.id, run.required_action.submit_tool_outputs.tool_calls)
+            run = wait_on_run(run.id,thread_id)
+        messages = client.beta.threads.messages.list(thread_id=thread_id,order="asc")
+        print('message',messages)
+        content = None
+        for thread_message in messages.data:
+            content = thread_message.content
+        print("Content List", content)
+        if len(tool_check) == 0:
+            chatbot_reply = content[0].text.value
+            print("Chatbot reply",chatbot_reply)
+            if source_language != 'en':
+                trans_output = GoogleTranslator(source='auto', target=source_language).translate(chatbot_reply)
+            else:
+                trans_output = chatbot_reply
+            response = {'chatbotResponse': trans_output,'function_name': 'normal_search'}
+        return jsonify(response)
+    else:
+        return jsonify({'error': 'User message not provided'}), 400
 
 @app.route('/logout')
 def logout():

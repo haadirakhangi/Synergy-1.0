@@ -12,3 +12,6 @@ opencv-python
 pypdf
 sentence_transformers
 faiss-cpu
+deep-translator
+lingua-language-detector
+iso639-lang
