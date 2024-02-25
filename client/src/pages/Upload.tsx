@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import ChatWidget from '../components/Layout/ChatWidget';
 
 //import { Document, Page, pdfjs } from 'react-pdf';
 
@@ -223,6 +224,7 @@ const Upload: React.FC = () => {
           )}
         </Box>
       </Container>
+      <ChatWidget/>
     </Layout>
   );
 };
