@@ -8,7 +8,7 @@ To install and set up the project through GitHub, follow these steps:
 1. Clone the repository using the git clone command:
 
 ```bash
-git clone 'link_here'
+git clone [link_here](https://github.com/haadirakhangi/Synergy_Code_Omega.git)
 ```
 
 2. Change the directory to the client:
