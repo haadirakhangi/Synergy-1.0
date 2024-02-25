@@ -46,6 +46,31 @@ def build_directory_structure(path):
         print(f"Error building structure for {path}: {e}")
     return result
 
+def count_projects(path):
+    try:
+        # List all items in the directory
+        contents = os.listdir(path)
+        
+        # Count the number of directories (projects)
+        project_count = sum(os.path.isdir(os.path.join(path, item)) for item in contents)
+        
+        return project_count
+    except Exception as e:
+        print(f"Error counting projects: {e}")
+        return 0  # Return 0 in case of an error
+
+def count_files_recursively(path):
+    file_count = 0
+    try:
+        for root, dirs, files in os.walk(path):
+            file_count += len(files)
+        
+        return file_count
+    except Exception as e:
+        print(f"Error counting files: {e}")
+        return 0  # Return 0 in case of an error
+
+
 # Bottom crop funtion
 def crop_bottom(input_image_path):
     image = cv2.imread(input_image_path)
@@ -185,7 +210,17 @@ def confirm_details():
 @app.route('/dashboard')
 def dashboard():
     root_path = 'projects'  # Replace with the actual path to your projects directory
-    return jsonify(build_directory_structure(root_path))
+    num_projects = count_projects(root_path)
+    print("Number of projects:- ", num_projects)
+    total_files = count_files_recursively(root_path)
+    print("Number of Files:- ", total_files)
+    directory_structure = build_directory_structure(root_path)
+    response_data = {
+        'num_projects': num_projects,
+        'num_files': total_files,
+        'directory_structure': directory_structure
+    }
+    return jsonify(response_data)
     
 
 @app.route('/logout')

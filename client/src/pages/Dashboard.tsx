@@ -19,8 +19,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { shadows } from '@mui/system';
 import { Treebeard } from 'react-treebeard';
-
+import "../styles/DashboardStyle.css";
 interface File {
   name: string;
 }
@@ -70,12 +71,15 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get<Folder>('api/dashboard'); // Update with your Flask server endpoint
-      setData(response.data);
+      const response = await axios.get<any>('api/dashboard');
+      setData(response.data.directory_structure);
+      setTotalProjects(response.data.num_projects);
+      setTotalFiles(response.data.num_files);
     } catch (error) {
       console.error('Error fetching directory structure:', error);
     }
   };
+
 
   const fetchDashboardData = async () => {
     try {
@@ -114,7 +118,7 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <Container sx={{ minHeight: '80vh', padding: '20px'}}>
+      <Container sx={{ minHeight: '80vh', padding: '20px' }}>
         <Typography variant="h4" component="h1" align="center" gutterBottom>
           PDF File Management Dashboard
         </Typography>
@@ -122,7 +126,7 @@ const Dashboard = () => {
         <Grid container spacing={3}>
           {/* Total Projects Card */}
           <Grid item xs={12} sm={6} md={4}>
-            <Card>
+            <Card sx={{ boxShadow: 3 }} className="cardAnimation">
               <CardContent>
                 <Typography variant="h6" component="div">
                   Total Projects
@@ -136,7 +140,7 @@ const Dashboard = () => {
 
           {/* Total Files Card */}
           <Grid item xs={12} sm={6} md={4}>
-            <Card>
+            <Card sx={{ boxShadow: 3 }} className="cardAnimation">
               <CardContent>
                 <Typography variant="h6" component="div">
                   Total Files
@@ -148,26 +152,6 @@ const Dashboard = () => {
             </Card>
           </Grid>
 
-          {/* Project Dropdown */}
-          <Grid item xs={12} sm={6} md={4}>
-            <Typography variant="h6" component="div">
-              Select Project
-            </Typography>
-            <Select
-              value={selectedProject || ''}
-              onChange={handleProjectChange}
-              fullWidth
-            >
-              <MenuItem value="" disabled>
-                Select a project
-              </MenuItem>
-              {/* Dynamically populate the projects here */}
-              {/* Example: */}
-              <MenuItem value="Project1">Project1</MenuItem>
-              <MenuItem value="Project2">Project2</MenuItem>
-              {/* Add more projects as needed */}
-            </Select>
-          </Grid>
 
           {/* File Categories Graph */}
           <Grid item xs={12}>
@@ -194,7 +178,19 @@ const Dashboard = () => {
             )}
           </Grid>
         </Grid>
-        <Treebeard data={data} onToggle={onToggle} />
+        <Typography variant="h3" component="div">
+          File Structure:
+        </Typography>
+        <Treebeard data={data} onToggle={onToggle}
+          style={{
+            tree: {
+              base: {
+                backgroundColor: '#212121',
+                color: 'white',
+              },
+            },
+          }}
+        />
       </Container>
     </Layout>
   );
