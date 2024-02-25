@@ -25,7 +25,7 @@ import json
 from pymongo import MongoClient
 import shutil
 from PIL import Image
-
+from gridfs import GridFS
 
 load_dotenv(find_dotenv())
 app = Flask(__name__)
@@ -86,7 +86,17 @@ def MongoDB(collection_name):
     client = MongoClient(connection_string)
     db = client.get_database("SEQUUS")
     records = db.get_collection(collection_name)
-    return records
+    fs = GridFS(db)
+
+    def insert_document_with_file(document, file_path):
+        # Insert document information
+        record_id = records.insert_one(document).inserted_id
+
+        # Store the PDF file in GridFS
+        with open(file_path, 'rb') as file:
+            fs.put(file, filename=record_id)
+
+    return records, insert_document_with_file
 
 #build directories
 def build_directory_structure(path):
@@ -282,6 +292,15 @@ def confirm_details():
         if not os.path.exists(new_directory):
             os.makedirs(new_directory)
         shutil.move(file_path, os.path.join(new_directory, new_filename))
+        mongo_collection, insert_document = MongoDB(project_name)
+        document_to_insert = {
+            'project_name': project_name,
+            'category': data['category'],
+            'document_type': data['document_type'],
+            'info': data_dict2,
+            'path': path,
+        }
+        insert_document(document_to_insert, path)
         return jsonify({'message': 'Details confirmed successfully','info': data_dict2,'path': path})
     else:
         loader = PyPDFLoader(file_path)
@@ -311,6 +330,20 @@ def confirm_details():
         if not os.path.exists(new_directory):
             os.makedirs(new_directory)
         shutil.move(file_path, os.path.join(new_directory, new_filename))
+        mongo_collection, insert_document = MongoDB(project_name)
+        document_to_insert = {
+            'project_name': project_name,
+            'category': data['category'],
+            'document_type': data['document_type'],
+            'info': {
+                'project_number': response.project_number,
+                'document_name': response.document_name,
+                'category': response.category,
+                'date': date,
+            },
+            'path': path,
+        }
+        insert_document(document_to_insert, path)
         return jsonify({'message': 'Details confirmed successfully','path': path})
 
 @app.route('/dashboard')
