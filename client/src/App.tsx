@@ -6,7 +6,6 @@ import Assistant from './pages/Assistant';
 import Dashboard from './pages/Dashboard';
 import Upload from './pages/Upload';
 import Pagenotfound from './pages/Pagenotfound';
-
 //import Layout from './components/Layout/Layout';
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";

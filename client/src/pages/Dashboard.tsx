@@ -19,6 +19,40 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { shadows } from '@mui/system';
+import { Treebeard } from 'react-treebeard';
+import "../styles/DashboardStyle.css";
+import ChatWidget from '../components/Layout/ChatWidget';
+
+interface File {
+  name: string;
+}
+
+interface Folder {
+  name: string;
+  children?: (File | Folder)[];
+}
+
+const folderStructure: Folder = {
+  name: 'Root',
+  toggled: true,
+  children: [
+    {
+      name: 'Folder 1',
+      children: [
+        { name: 'File 1.pdf' },
+        { name: 'File 2.pdf' },
+      ],
+    },
+    {
+      name: 'Folder 2',
+      children: [
+        { name: 'File 3.pdf' },
+        { name: 'File 4.pdf' },
+      ],
+    },
+  ],
+};
 
 const Dashboard = () => {
   const [totalProjects, setTotalProjects] = useState<number>(0);
@@ -27,6 +61,27 @@ const Dashboard = () => {
   const [fileCategories, setFileCategories] = useState<
     { category: string; count: number }[]
   >([]);
+  const [data, setData] = useState<Folder>(folderStructure);
+  const [treeData, setTreeData] = useState<Folder>({ name: 'Root', toggled: true });
+
+  const onToggle = (node: any, toggled: boolean) => {
+    if (node.children) {
+      node.toggled = toggled;
+    }
+    setData({ ...data });
+  };
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get<any>('api/dashboard');
+      setData(response.data.directory_structure);
+      setTotalProjects(response.data.num_projects);
+      setTotalFiles(response.data.num_files);
+    } catch (error) {
+      console.error('Error fetching directory structure:', error);
+    }
+  };
+
 
   const fetchDashboardData = async () => {
     try {
@@ -54,6 +109,7 @@ const Dashboard = () => {
   useEffect(() => {
     // Fetch initial dashboard data
     fetchDashboardData();
+    fetchData();
   }, []);
 
   const handleProjectChange = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -64,7 +120,7 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <Container sx={{ minHeight: '80vh'}}>
+      <Container sx={{ minHeight: '80vh', padding: '20px' }}>
         <Typography variant="h4" component="h1" align="center" gutterBottom>
           PDF File Management Dashboard
         </Typography>
@@ -72,7 +128,7 @@ const Dashboard = () => {
         <Grid container spacing={3}>
           {/* Total Projects Card */}
           <Grid item xs={12} sm={6} md={4}>
-            <Card>
+            <Card sx={{ boxShadow: 3 }} className="cardAnimation">
               <CardContent>
                 <Typography variant="h6" component="div">
                   Total Projects
@@ -86,7 +142,7 @@ const Dashboard = () => {
 
           {/* Total Files Card */}
           <Grid item xs={12} sm={6} md={4}>
-            <Card>
+            <Card sx={{ boxShadow: 3 }} className="cardAnimation">
               <CardContent>
                 <Typography variant="h6" component="div">
                   Total Files
@@ -98,26 +154,6 @@ const Dashboard = () => {
             </Card>
           </Grid>
 
-          {/* Project Dropdown */}
-          <Grid item xs={12} sm={6} md={4}>
-            <Typography variant="h6" component="div">
-              Select Project
-            </Typography>
-            <Select
-              value={selectedProject || ''}
-              onChange={handleProjectChange}
-              fullWidth
-            >
-              <MenuItem value="" disabled>
-                Select a project
-              </MenuItem>
-              {/* Dynamically populate the projects here */}
-              {/* Example: */}
-              <MenuItem value="Project1">Project1</MenuItem>
-              <MenuItem value="Project2">Project2</MenuItem>
-              {/* Add more projects as needed */}
-            </Select>
-          </Grid>
 
           {/* File Categories Graph */}
           <Grid item xs={12}>
@@ -144,7 +180,21 @@ const Dashboard = () => {
             )}
           </Grid>
         </Grid>
+        <Typography variant="h3" component="div">
+          File Structure:
+        </Typography>
+        <Treebeard data={data} onToggle={onToggle}
+          style={{
+            tree: {
+              base: {
+                backgroundColor: '#212121',
+                color: 'white',
+              },
+            },
+          }}
+        />
       </Container>
+      <ChatWidget />
     </Layout>
   );
 };

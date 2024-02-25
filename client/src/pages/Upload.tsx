@@ -13,6 +13,8 @@ import {
   MenuItem,
 } from '@mui/material';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+
 //import { Document, Page, pdfjs } from 'react-pdf';
 
 const Upload: React.FC = () => {
@@ -86,9 +88,23 @@ const Upload: React.FC = () => {
 
   const handleConfirmDetails = async () => {
     try {
+      setLoading(true);
       const confirmDetailsResponse = await axios.post('api/confirm-details', editedDetails);
-      console.log('Confirmed Details:', confirmDetailsResponse.data);
-
+      const path = confirmDetailsResponse.data.path;
+      console.log("path",path)
+      setLoading(false);
+      await Swal.fire({
+        title: 'Your document has been saved in the following directory:- ',
+        text: path,
+        icon: 'success',
+        confirmButtonText: 'OK',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Redirect to the dashboard
+          // Update the path accordingly based on your routing setup
+          window.location.href = '/dashboard';
+        }
+      });
       // You can update the state or perform additional actions based on the confirmation response
     } catch (error) {
       console.error('Error confirming details:', error);
@@ -108,7 +124,7 @@ const Upload: React.FC = () => {
           minHeight: '80vh', // Adjust the minHeight property as needed
         }}
       >
-        <Box sx={{ mt: 1 }}>
+        <Box sx={{ mt: 1 ,mb: 10}}>
           <Typography component="h1" variant="h3" style={{ marginBottom: '1em' }}>
             Upload Your Documents Below
           </Typography>
@@ -140,7 +156,7 @@ const Upload: React.FC = () => {
 
           {loading && <CircularProgress sx={{
             color: 'black',  // Set the color to black
-          }} style={{ marginTop: '1em', marginLeft: '50px' }} />}
+          }} style={{ marginTop: '1em', marginLeft: '550px' }} />}
 
           {response && (
             <div style={{ marginTop: '1em' }}>
@@ -169,7 +185,7 @@ const Upload: React.FC = () => {
                 style={{ marginBottom: '1em' }}
               >
                 <MenuItem value="construction_plan">Construction Plan</MenuItem>
-                <MenuItem value="other_docs">Other Documents</MenuItem>
+                <MenuItem value="other_document">Other Documents</MenuItem>
               </TextField>
 
               <TextField

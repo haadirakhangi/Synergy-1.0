@@ -41,9 +41,6 @@ const Header = () => {
           <NavLink to={"/dashbord"}>Dashboard</NavLink>
         </li>
         <li>
-          <NavLink to={"/assistant"}>Assistant</NavLink>
-        </li>
-        <li>
           <NavLink to={"/upload"}>Upload</NavLink>
         </li>
       </ul>
@@ -83,9 +80,6 @@ const Header = () => {
                 </li>
                 <li>
                   <NavLink to={"/dashboard"}>Dashboard</NavLink>
-                </li>
-                <li>
-                  <NavLink to={"/assistant"}>Assistant</NavLink>
                 </li>
                 <li>
                   <NavLink to={"/upload"}>Upload</NavLink>
