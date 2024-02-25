@@ -1,6 +1,6 @@
 .home {
     /* height: 90vh; Remove or adjust this line */
-    min-height: 100vh; /* Set a minimum height to ensure scrollability */
+    min-height: 90vh; /* Set a minimum height to ensure scrollability */
     display: flex;
     justify-content: center;
     align-items: left;
@@ -12,6 +12,7 @@
   
   
   .headerContainer {
+    padding: 20px;
     width: auto;
     margin-left: 30px;
   }

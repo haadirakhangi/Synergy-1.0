@@ -3,10 +3,8 @@ import { Link } from 'react-router-dom';
 import Layout from '../components/Layout/Layout';
 import '../styles/HomeStyles.css';
 import home1 from '../images/image5.png';
-import home2 from '../images/image2.jpg';
-import home3 from '../images/image3.png';
-import home4 from '../images/image4.jpg';
-import home5 from '../images/image5.png';
+//import home2 from '../images/image2.jpg';
+
 
 const Home: React.FC = () => {
   const [backgroundImage, setBackgroundImage] = useState(home1);
@@ -16,8 +14,8 @@ const Home: React.FC = () => {
       const scrollPosition = window.scrollY;
 
       // Define the scroll positions where you want to change the background image
-      const breakpoints = [0, 500, 1000, 1500];
-      const images = [home1, home2, home3, home4, home5];
+      const breakpoints = [0]; // Adjust as needed
+      const images = [home1]; // Add more images if necessary
 
       // Determine the current background image based on the scroll position
       for (let i = 0; i < breakpoints.length - 1; i++) {
@@ -45,10 +43,10 @@ const Home: React.FC = () => {
     <Layout>
       <div className="home" style={{ backgroundImage: `url(${backgroundImage})` }}>
         <div className="headerContainer">
-          <h1>Document Website</h1>
-          <p>Where construction plans find their home!</p>
+          <h1>Sequus.AI</h1>
+          <p>Where construction plans find <br/> their home!</p>
           <Link to="/upload">
-            <button>Getting Started</button>
+            <button>Get Started</button>
           </Link>
         </div>
       </div>
