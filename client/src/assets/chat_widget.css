@@ -15,7 +15,7 @@
     font-size: 25px;
     cursor: pointer;
     color: white;
-    background-color: #9F7AEA;
+    background-color: black;
     height: 60px;
     border-radius: 50%;
     align-items: center;
@@ -107,8 +107,8 @@
   bottom: 20px;
   right: 15px;
   font-size: 25px;
-  background-color: #9F7AEA;
-  color: #fff;
+  background-color: white;
+  color: black;
   padding: 15px;
   border-radius: 30%;
   cursor: pointer;
@@ -117,7 +117,7 @@
 }
 
 .floating-chatbot-button:hover {
-  background-color: #6B46C1; /* Change to the desired background color on hover */
+  background-color: black; /* Change to the desired background color on hover */
 }
 /* Add a keyframe animation for the opening effect */
 @keyframes slideIn {
@@ -178,7 +178,7 @@
 }
 
 .user-input button {
-  background-color: #9F7AEA;
+  background-color: black;
   color: #fff;
   padding: 8px 12px;
   border: none;
