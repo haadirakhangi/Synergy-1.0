@@ -174,10 +174,11 @@ def confirm_details():
         date = data_dict2['date'].replace("/","_")
         new_filename = data_dict2['drawing_number']+"_"+data_dict2['revision']+"_"+data_dict2['drawing_status']+"_"+date+".pdf"
         new_directory = os.path.join("projects",project_name,data['category'],data['document_type'])
+        path = os.path.join(new_directory, new_filename)
         if not os.path.exists(new_directory):
             os.makedirs(new_directory)
         shutil.move(file_path, os.path.join(new_directory, new_filename))
-        return jsonify({'message': 'Details confirmed successfully','info': data_dict2})
+        return jsonify({'message': 'Details confirmed successfully','info': data_dict2,'path': path})
     else:
         loader = PyPDFLoader(file_path)
         docs = loader.load()
@@ -202,10 +203,11 @@ def confirm_details():
         date = response.date.replace(" ","_")
         new_filename = response.project_number+"_"+response.document_name+"_"+"_"+date+".pdf"
         new_directory = os.path.join("projects",project_name,data['category'],data['document_type'],response.category)
+        path = os.path.join(new_directory, new_filename)
         if not os.path.exists(new_directory):
             os.makedirs(new_directory)
         shutil.move(file_path, os.path.join(new_directory, new_filename))
-        return jsonify({'message': 'Details confirmed successfully','info': response})
+        return jsonify({'message': 'Details confirmed successfully','path': path})
 
 @app.route('/dashboard')
 def dashboard():
