@@ -7,6 +7,7 @@ import home2 from '../images/image2.jpg';
 import home3 from '../images/image3.png';
 import home4 from '../images/image4.jpg';
 import home5 from '../images/image5.png';
+import ChatWidget from '../components/Layout/ChatWidget';
 
 const Home: React.FC = () => {
   const [backgroundImage, setBackgroundImage] = useState(home1);
@@ -42,7 +43,8 @@ const Home: React.FC = () => {
   }, []);
 
   return (
-    <Layout>
+    <>
+    <Layout >
       <div className="home" style={{ backgroundImage: `url(${backgroundImage})` }}>
         <div className="headerContainer">
           <h1>Document Website</h1>
@@ -53,6 +55,8 @@ const Home: React.FC = () => {
         </div>
       </div>
     </Layout>
+    <ChatWidget />
+    </>
   );
 };
 
