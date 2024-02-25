@@ -13,7 +13,7 @@ import {
   MenuItem,
 } from '@mui/material';
 import axios from 'axios';
-import { Document, Page, pdfjs } from 'react-pdf';
+//import { Document, Page, pdfjs } from 'react-pdf';
 
 const Upload: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -105,6 +105,7 @@ const Upload: React.FC = () => {
           flexDirection: 'column',
           alignItems: 'center',
           mt: 8,
+          minHeight: '80vh', // Adjust the minHeight property as needed
         }}
       >
         <Box sx={{ mt: 1 }}>
@@ -168,7 +169,7 @@ const Upload: React.FC = () => {
                 style={{ marginBottom: '1em' }}
               >
                 <MenuItem value="construction_plan">Construction Plan</MenuItem>
-                <MenuItem value="other_docs">Other Documents</MenuItem>
+                <MenuItem value="other_document">Other Documents</MenuItem>
               </TextField>
 
               <TextField

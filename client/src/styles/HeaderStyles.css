@@ -1,29 +1,50 @@
+/* HeaderStyles.css */
+
 .navigation-menu {
     list-style: none;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0; /* Remove the default margin */
   }
+  
   .navigation-menu li {
     margin: 0px 20px;
   }
+  
   .navigation-menu li a {
     text-decoration: none;
     color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    transition: color 0.3s ease; /* Add transition effect for color change */
   }
+  
+  .navigation-menu li a:hover {
+    color: goldenrod;
+  }
+  
   .active {
     color: goldenrod !important;
     font-weight: bold !important;
   }
+  
   /* mobile view */
   .mobile-navigation {
     list-style: none;
   }
+  
   .mobile-navigation li {
     margin-top: 20px;
   }
+  
   .mobile-navigation li a {
     text-decoration: none;
     font-size: 1.4rem;
     color: black;
+    transition: color 0.3s ease; /* Add transition effect for color change */
   }
+  
+  .mobile-navigation li a:hover {
+    color: darkslategray;
+  }
+  

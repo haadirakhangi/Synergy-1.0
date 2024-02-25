@@ -1,7 +1,7 @@
 openai
 langchain
-langchain_community
-langchain_openai
+langchain-community
+langchain-openai
 langsmith
 python-dotenv
 flask
@@ -9,3 +9,6 @@ google-generativeai
 pdf2image
 poppler-utils
 opencv-python
+pypdf
+sentence_transformers
+faiss-cpu
