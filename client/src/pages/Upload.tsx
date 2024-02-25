@@ -126,7 +126,7 @@ const Upload: React.FC = () => {
         }}
       >
         <Box sx={{ mt: 1 ,mb: 10}}>
-          <Typography component="h1" variant="h3" style={{ marginBottom: '1em' }}>
+          <Typography component="h1" variant="h3" align="center" style={{ marginBottom: '1em' }}>
             Upload Your Documents Below
           </Typography>
           <TextField

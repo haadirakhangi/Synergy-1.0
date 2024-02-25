@@ -121,7 +121,7 @@ const Dashboard = () => {
   return (
     <Layout>
       <Container sx={{ minHeight: '80vh', padding: '20px', bgcolor: '#d9d9da' }}>
-        <Typography variant="h4" component="h1" align="center" gutterBottom>
+        <Typography variant="h3" component="h1" align="center" gutterBottom>
           PDF File Management Dashboard
         </Typography>
 
