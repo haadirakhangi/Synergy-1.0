@@ -154,6 +154,19 @@ const Dashboard = () => {
             </Card>
           </Grid>
 
+          <Grid item xs={12} sm={6} md={4}>
+            <Card sx={{ boxShadow: 3 }} className="cardAnimation">
+              <CardContent>
+                <Typography variant="h6" component="div">
+                  Total Collaborators
+                </Typography>
+                <Typography variant="h4" component="div">
+                  4
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
 
           {/* File Categories Graph */}
           <Grid item xs={12}>

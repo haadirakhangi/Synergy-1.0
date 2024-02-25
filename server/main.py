@@ -22,6 +22,7 @@ import cv2
 import os
 import re
 import json
+from pymongo import MongoClient
 import shutil
 from PIL import Image
 
@@ -38,6 +39,11 @@ generation_config = {
   "top_k": 1,
   "max_output_tokens": 2048,
 }
+
+passw = os.getenv("passw")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+connection_string = f"mongodb+srv://hatim:{passw}@cluster0.f7or37n.mongodb.net/?retryWrites=true&w=majority"
+
 
 EMBEDDINGS = OpenAIEmbeddings()
 
@@ -75,6 +81,12 @@ assistant = client.beta.assistants.create(
 thread = client.beta.threads.create()
 assistant_id = assistant.id
 thread_id = thread.id
+
+def MongoDB(collection_name):
+    client = MongoClient(connection_string)
+    db = client.get_database("SEQUUS")
+    records = db.get_collection(collection_name)
+    return records
 
 #build directories
 def build_directory_structure(path):
@@ -241,7 +253,7 @@ def get_category():
         response.resolve()
         # data_dict1 = {'category': 'Electrical', 'document_type': 'construction_plan', 'index_position': 'bottom'}
         data_dict1 = get_dict_from_json(response)
-    return jsonify({'message': 'Files uploaded successfully',"info": data_dict1}), 200
+    return jsonify({'message': 'Files uploaded successfully',"info": data_dict1, "path": file_path}), 200
 
 @app.route('/confirm-details', methods=['POST'])
 def confirm_details():
